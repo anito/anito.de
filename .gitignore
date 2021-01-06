@@ -33,6 +33,4 @@ CVS
 # my plugins
 !/wp-content/plugins
 /wp-content/plugins/*
-!/wp-content/plugins/woocommerce-archive-variants
-!/wp-content/plugins/perfect-woocommerce-brands
-!/wp-content/plugins/woo-gutenberg-products-block
+!/wp-content/plugins/wp-maintenance-mode
