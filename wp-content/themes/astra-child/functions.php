@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/includes/duplicate_content.php';
+
 /**
  * Astra Child Theme functions and definitions
  *
