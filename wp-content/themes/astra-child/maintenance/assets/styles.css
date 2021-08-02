@@ -58,10 +58,7 @@ h2 { color: rgba(255,255,255,.5); }
     max-width: 640px;
     padding: 0 20px;
 }
-.header {
-    text-align: center;
-    margin: auto 0 16px;
-}
+.header { margin: auto 0 16px; }
 .timer {
     display: -webkit-box;
     display: -ms-flexbox;
@@ -135,14 +132,14 @@ h2 { color: rgba(255,255,255,.5); }
     padding: 0;
     vertical-align: middle;
 }
-.footer .title a {
-    text-decoration: underline;
-}
-.bot-container {
-    margin-bottom: 10%;
-}
 .hide {
     display: none;
+}
+.contact_us {
+    display: inline-block;
+    position: relative;
+    bottom: 60px;
+    color: #c5c5c5 !important;
 }
 @media (min-width: 500px) {
     .timer { font-size: 80px; }
