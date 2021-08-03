@@ -2,8 +2,7 @@
 
 if (!class_exists('WP_Maintenance_Mode_Admin')) {
 
-    class WP_Maintenance_Mode_Admin
-    {
+    class WP_Maintenance_Mode_Admin {
 
         protected static $instance = null;
         protected $plugin_slug;
@@ -13,8 +12,7 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
         protected $plugin_screen_hook_suffix = null;
         private $dismissed_notices_key = 'wpmm_dismissed_notices';
 
-        private function __construct()
-        {
+        private function __construct() {
             $plugin = WP_Maintenance_Mode::get_instance();
             $this->plugin_slug = $plugin->get_plugin_slug();
             $this->plugin_settings = $plugin->get_plugin_settings();
@@ -49,8 +47,7 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
             add_filter('admin_footer_text', array($this, 'admin_footer_text'), 5);
         }
 
-        public static function get_instance()
-        {
+        public static function get_instance() {
             if (null == self::$instance) {
                 self::$instance = new self;
             }
@@ -64,8 +61,7 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
          * @since 2.0.0
          * @return type
          */
-        public function enqueue_admin_styles()
-        {
+        public function enqueue_admin_styles() {
             if (!isset($this->plugin_screen_hook_suffix)) {
                 return;
             }
@@ -88,8 +84,7 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
          * @since 2.0.0
          * @return
          */
-        public function enqueue_admin_scripts()
-        {
+        public function enqueue_admin_scripts() {
             if (!isset($this->plugin_screen_hook_suffix)) {
                 return;
             }
@@ -102,7 +97,7 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
                 wp_enqueue_script($this->plugin_slug . '-admin-chosen', WPMM_JS_URL . 'chosen.jquery' . WPMM_ASSETS_SUFFIX . '.js', array(), WP_Maintenance_Mode::VERSION);
                 wp_localize_script($this->plugin_slug . '-admin-script', 'wpmm_vars', array(
                     'ajax_url' => admin_url('admin-ajax.php'),
-                    'plugin_url' => admin_url('options-general.php?page=' . $this->plugin_slug),
+                    'plugin_url' => admin_url('options-general.php?page=' . $this->plugin_slug)
                 ));
             }
 
@@ -117,8 +112,7 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
          * @global object $wpdb
          * @throws Exception
          */
-        public function subscribers_export()
-        {
+        public function subscribers_export() {
             global $wpdb;
 
             try {
@@ -156,8 +150,7 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
          * @global object $wpdb
          * @throws Exception
          */
-        public function subscribers_empty_list()
-        {
+        public function subscribers_empty_list() {
             global $wpdb;
 
             try {
@@ -168,8 +161,9 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
 
                 // delete all subscribers
                 $wpdb->query("DELETE FROM {$wpdb->prefix}wpmm_subscribers");
-
-                wp_send_json_success(sprintf(__('You have %d subscriber(s)', $this->plugin_slug), 0));
+		
+				$message = sprintf(_nx('You have %d subscriber', 'You have %s subscribers', 0, 'ajax response',$this->plugin_slug), 0);		
+                wp_send_json_success($message);
             } catch (Exception $ex) {
                 wp_send_json_error($ex->getMessage());
             }
@@ -181,8 +175,7 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
          * @since 2.0.0
          * @throws Exception
          */
-        public function reset_settings()
-        {
+        public function reset_settings() {
             try {
                 // check capabilities
                 if (!current_user_can('manage_options')) {
@@ -201,7 +194,7 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
 
                 // check nonce validation
                 if (!wp_verify_nonce($_POST['_wpnonce'], 'tab-' . $_POST['tab'])) {
-                    throw new Exception(__('Security check.', $this->plugin_slug));
+                   throw new Exception(__('Security check.', $this->plugin_slug));
                 }
 
                 // check existence in plugin default settings
@@ -225,10 +218,9 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
          *
          * @since 2.0.0
          */
-        public function add_plugin_menu()
-        {
+        public function add_plugin_menu() {
             $this->plugin_screen_hook_suffix = add_options_page(
-                __('WP Maintenance Mode', $this->plugin_slug), __('WP Maintenance Mode', $this->plugin_slug), 'manage_options', $this->plugin_slug, array($this, 'display_plugin_settings')
+                    __('WP Maintenance Mode', $this->plugin_slug), __('WP Maintenance Mode', $this->plugin_slug), 'manage_options', $this->plugin_slug, array($this, 'display_plugin_settings')
             );
         }
 
@@ -238,15 +230,14 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
          * @since 2.0.0
          * @global object $wp_roles
          */
-        public function display_plugin_settings()
-        {
+        public function display_plugin_settings() {
             global $wp_roles;
 
             // save settings
             $this->save_plugin_settings();
 
             // show settings
-            include_once WPMM_VIEWS_PATH . 'settings.php';
+            include_once(WPMM_VIEWS_PATH . 'settings.php');
         }
 
         /**
@@ -254,8 +245,7 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
          *
          * @since 2.0.0
          */
-        public function save_plugin_settings()
-        {
+        public function save_plugin_settings() {
             if (!empty($_POST) && !empty($_POST['tab'])) {
                 if (!wp_verify_nonce($_POST['_wpnonce'], 'tab-' . $_POST['tab'])) {
                     die(__('Security check.', $this->plugin_slug));
@@ -286,15 +276,15 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
 
                         // delete cache when is already activated, when is activated and when is deactivated
                         if (
-                            isset($this->plugin_settings['general']['status']) && isset($_POST['options']['general']['status']) &&
-                            (
+                                isset($this->plugin_settings['general']['status']) && isset($_POST['options']['general']['status']) &&
+                                (
                                 ($this->plugin_settings['general']['status'] == 1 && in_array($_POST['options']['general']['status'], array(0, 1))) ||
                                 ($this->plugin_settings['general']['status'] == 0 && $_POST['options']['general']['status'] == 1)
-                            )
+                                )
                         ) {
                             $this->delete_cache();
                         }
-                        break;
+                    break;
                     case 'design':
                         $custom_css = array();
 
@@ -308,10 +298,6 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
                         add_filter('safe_style_css', array($this, 'add_safe_style_css')); // add before we save
                         $_POST['options']['design']['text'] = wp_kses_post($_POST['options']['design']['text']);
                         $_POST['options']['design']['credits'] = wp_kses_post($_POST['options']['design']['credits']);
-                        $_POST['options']['design']['creator_alt'] = wp_kses_post($_POST['options']['design']['creator_alt']);
-                        $_POST['options']['design']['creator_href'] = wp_kses_post($_POST['options']['design']['creator_href']);
-                        $_POST['options']['design']['creator_src'] = wp_kses_post($_POST['options']['design']['creator_src']);
-                        $_POST['options']['design']['creator_target'] = wp_kses_post($_POST['options']['design']['creator_target']);
                         remove_filter('safe_style_css', array($this, 'add_safe_style_css')); // remove after we save
 
                         if (!empty($_POST['options']['design']['text_color'])) {
@@ -345,7 +331,7 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
                         if (!empty($this->plugin_settings['general']['status']) && $this->plugin_settings['general']['status'] == 1) {
                             $this->delete_cache();
                         }
-                        break;
+                    break;
                     case 'modules':
                         $custom_css = array();
 
@@ -376,6 +362,7 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
                         $_POST['options']['modules']['social_dribbble'] = sanitize_text_field($_POST['options']['modules']['social_dribbble']);
                         $_POST['options']['modules']['social_twitter'] = sanitize_text_field($_POST['options']['modules']['social_twitter']);
                         $_POST['options']['modules']['social_facebook'] = sanitize_text_field($_POST['options']['modules']['social_facebook']);
+                        $_POST['options']['modules']['social_instagram'] = sanitize_text_field($_POST['options']['modules']['social_instagram']);
                         $_POST['options']['modules']['social_pinterest'] = sanitize_text_field($_POST['options']['modules']['social_pinterest']);
                         $_POST['options']['modules']['social_google+'] = sanitize_text_field($_POST['options']['modules']['social_google+']);
                         $_POST['options']['modules']['social_linkedin'] = sanitize_text_field($_POST['options']['modules']['social_linkedin']);
@@ -387,6 +374,7 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
 
                         // GOOGLE ANALYTICS
                         $_POST['options']['modules']['ga_status'] = (int) $_POST['options']['modules']['ga_status'];
+						$_POST['options']['modules']['ga_anonymize_ip'] = (int) $_POST['options']['modules']['ga_anonymize_ip'];
                         $_POST['options']['modules']['ga_code'] = wpmm_sanitize_ga_code($_POST['options']['modules']['ga_code']);
 
                         $_POST['options']['modules']['custom_css'] = $custom_css;
@@ -395,35 +383,35 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
                         if (!empty($this->plugin_settings['general']['status']) && $this->plugin_settings['general']['status'] == 1) {
                             $this->delete_cache();
                         }
-                        break;
+                    break;
                     case 'bot':
                         $custom_css = array();
 
-                        $_POST['options']['bot']['status'] = (int) $_POST['options']['bot']['status'];
+                        $_POST['options']['bot']['status']           = (int) $_POST['options']['bot']['status'];
 
-                        $_POST['options']['bot']['name'] = sanitize_text_field($_POST['options']['bot']['name']);
+                        $_POST['options']['bot']['name']             = sanitize_text_field($_POST['options']['bot']['name']);
 
-                        if (!empty($_POST['options']['bot']['avatar'])) {
+                        if(!empty($_POST['options']['bot']['avatar'])) {
                             $_POST['options']['bot']['avatar'] = esc_url($_POST['options']['bot']['avatar']);
-                            $custom_css['bot-avatar'] = ".bot-avatar { background-image: url('{$_POST['options']['bot']['avatar']}');}";
+                            $custom_css['bot-avatar']          = ".bot-avatar { background-image: url('{$_POST['options']['bot']['avatar']}');}";
                         }
 
-                        $_POST['options']['bot']['messages']['01'] = sanitize_text_field($_POST['options']['bot']['messages']['01']);
-                        $_POST['options']['bot']['messages']['02'] = sanitize_text_field($_POST['options']['bot']['messages']['02']);
-                        $_POST['options']['bot']['messages']['03'] = sanitize_text_field($_POST['options']['bot']['messages']['03']);
-                        $_POST['options']['bot']['messages']['04'] = sanitize_text_field($_POST['options']['bot']['messages']['04']);
-                        $_POST['options']['bot']['messages']['05'] = sanitize_text_field($_POST['options']['bot']['messages']['05']);
-                        $_POST['options']['bot']['messages']['06'] = sanitize_text_field($_POST['options']['bot']['messages']['06']);
-                        $_POST['options']['bot']['messages']['07'] = sanitize_text_field($_POST['options']['bot']['messages']['07']);
+                        $_POST['options']['bot']['messages']['01']   = sanitize_text_field($_POST['options']['bot']['messages']['01']);
+                        $_POST['options']['bot']['messages']['02']   = sanitize_text_field($_POST['options']['bot']['messages']['02']);
+                        $_POST['options']['bot']['messages']['03']   = sanitize_text_field($_POST['options']['bot']['messages']['03']);
+                        $_POST['options']['bot']['messages']['04']   = sanitize_text_field($_POST['options']['bot']['messages']['04']);
+                        $_POST['options']['bot']['messages']['05']   = sanitize_text_field($_POST['options']['bot']['messages']['05']);
+                        $_POST['options']['bot']['messages']['06']   = sanitize_text_field($_POST['options']['bot']['messages']['06']);
+                        $_POST['options']['bot']['messages']['07']   = sanitize_text_field($_POST['options']['bot']['messages']['07']);
                         $_POST['options']['bot']['messages']['08_1'] = sanitize_text_field($_POST['options']['bot']['messages']['08_1']);
                         $_POST['options']['bot']['messages']['08_2'] = sanitize_text_field($_POST['options']['bot']['messages']['08_2']);
-                        $_POST['options']['bot']['messages']['09'] = sanitize_text_field($_POST['options']['bot']['messages']['09']);
-                        $_POST['options']['bot']['messages']['10'] = sanitize_text_field($_POST['options']['bot']['messages']['10']);
+                        $_POST['options']['bot']['messages']['09']   = sanitize_text_field($_POST['options']['bot']['messages']['09']);
+                        $_POST['options']['bot']['messages']['10']   = sanitize_text_field($_POST['options']['bot']['messages']['10']);
 
-                        $_POST['options']['bot']['responses']['01'] = sanitize_text_field($_POST['options']['bot']['responses']['01']);
+                        $_POST['options']['bot']['responses']['01']   = sanitize_text_field($_POST['options']['bot']['responses']['01']);
                         $_POST['options']['bot']['responses']['02_1'] = sanitize_text_field($_POST['options']['bot']['responses']['02_1']);
                         $_POST['options']['bot']['responses']['02_2'] = sanitize_text_field($_POST['options']['bot']['responses']['02_2']);
-                        $_POST['options']['bot']['responses']['03'] = sanitize_text_field($_POST['options']['bot']['responses']['03']);
+                        $_POST['options']['bot']['responses']['03']   = sanitize_text_field($_POST['options']['bot']['responses']['03']);
 
                         $_POST['options']['bot']['custom_css'] = $custom_css;
 
@@ -434,15 +422,16 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
                         if (!empty($this->plugin_settings['general']['status']) && $this->plugin_settings['general']['status'] == 1) {
                             $this->delete_cache();
                         }
-                        break;
+                    break;
                     case 'gdpr':
                         //$custom_css = array();
 
-                        $_POST['options']['gdpr']['status'] = (int) $_POST['options']['gdpr']['status'];
+                        $_POST['options']['gdpr']['status'] = (int)$_POST['options']['gdpr']['status'];
                         $_POST['options']['gdpr']['policy_page_label'] = sanitize_text_field($_POST['options']['gdpr']['policy_page_label']);
                         $_POST['options']['gdpr']['policy_page_link'] = sanitize_text_field($_POST['options']['gdpr']['policy_page_link']);
-                        $_POST['options']['gdpr']['contact_form_tail'] = sanitize_text_field($_POST['options']['gdpr']['contact_form_tail']);
-                        $_POST['options']['gdpr']['subscribe_form_tail'] = sanitize_text_field($_POST['options']['gdpr']['subscribe_form_tail']);
+						$_POST['options']['gdpr']['policy_page_target'] = (int) $_POST['options']['gdpr']['policy_page_target'];
+                        $_POST['options']['gdpr']['contact_form_tail'] = wp_kses($_POST['options']['gdpr']['contact_form_tail'], wpmm_gdpr_textarea_allowed_html());
+                        $_POST['options']['gdpr']['subscribe_form_tail'] = wp_kses($_POST['options']['gdpr']['subscribe_form_tail'], wpmm_gdpr_textarea_allowed_html());
                 }
 
                 $this->plugin_settings[$tab] = $_POST['options'][$tab];
@@ -458,13 +447,12 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
          * @param array $properties
          * @return array
          */
-        public function add_safe_style_css($properties)
-        {
+        public function add_safe_style_css($properties) {
             $new_properties = array(
                 'min-height',
                 'max-height',
                 'min-width',
-                'max-width',
+                'max-width'
             );
 
             return array_merge($new_properties, $properties);
@@ -477,28 +465,27 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
          * @param array $messages
          * @throws Exception
          */
-        public function set_datajs_file($messages = array())
-        {
+        public function set_datajs_file($messages = array()) {
             $data = "var botName = \"{$messages['name']}\",\n"
                 . "botAvatar = \"{$messages['avatar']}\",\n"
                 . "conversationData = {\"homepage\": {1: { \"statement\": [ \n";
-            $data .= (!empty($messages['messages']['01'])) ? "\"{$messages['messages']['01']}\", \n" : '';
-            $data .= (!empty($messages['messages']['02'])) ? "\"{$messages['messages']['02']}\", \n" : '';
-            $data .= (!empty($messages['messages']['03'])) ? "\"{$messages['messages']['03']}\", \n" : '';
-            $data .= "], \"input\": {\"name\": \"name\", \"consequence\": 1.2}},1.2:{\"statement\": function(context) {return [ \n";
-            $data .= (!empty($messages['messages']['04'])) ? "\"{$messages['messages']['04']}\", \n" : '';
-            $data .= (!empty($messages['messages']['05'])) ? "\"{$messages['messages']['05']}\", \n" : '';
-            $data .= (!empty($messages['messages']['06'])) ? "\"{$messages['messages']['06']}\", \n" : '';
-            $data .= (!empty($messages['messages']['07'])) ? "\"{$messages['messages']['07']}\", \n" : '';
-            $data .= "];},\"options\": [{ \"choice\": \"{$messages['responses']['02_1']}\",\"consequence\": 1.4},{ \n"
+                $data .= (!empty($messages['messages']['01'])) ? "\"{$messages['messages']['01']}\", \n" : '';
+                $data .= (!empty($messages['messages']['02'])) ? "\"{$messages['messages']['02']}\", \n" : '';
+                $data .= (!empty($messages['messages']['03'])) ? "\"{$messages['messages']['03']}\", \n" : '';
+                $data .= "], \"input\": {\"name\": \"name\", \"consequence\": 1.2}},1.2:{\"statement\": function(context) {return [ \n";
+                $data .= (!empty($messages['messages']['04'])) ? "\"{$messages['messages']['04']}\", \n" : '';
+                $data .= (!empty($messages['messages']['05'])) ? "\"{$messages['messages']['05']}\", \n" : '';
+                $data .= (!empty($messages['messages']['06'])) ? "\"{$messages['messages']['06']}\", \n" : '';
+                $data .= (!empty($messages['messages']['07'])) ? "\"{$messages['messages']['07']}\", \n" : '';
+                $data .= "];},\"options\": [{ \"choice\": \"{$messages['responses']['02_1']}\",\"consequence\": 1.4},{ \n"
                 . "\"choice\": \"{$messages['responses']['02_2']}\",\"consequence\": 1.5}]},1.4: { \"statement\": [ \n";
-            $data .= (!empty($messages['messages']['08_1'])) ? "\"{$messages['messages']['08_1']}\", \n" : '';
-            $data .= "], \"email\": {\"email\": \"email\", \"consequence\": 1.6}},1.5: {\"statement\": function(context) {return [ \n";
-            $data .= (!empty($messages['messages']['08_2'])) ? "\"{$messages['messages']['08_2']}\", \n" : '';
-            $data .= "];}},1.6: { \"statement\": [ \n";
-            $data .= (!empty($messages['messages']['09'])) ? "\"{$messages['messages']['09']}\", \n" : '';
-            $data .= (!empty($messages['messages']['10'])) ? "\"{$messages['messages']['10']}\", \n" : '';
-            $data .= "]}}};";
+                $data .= (!empty($messages['messages']['08_1'])) ? "\"{$messages['messages']['08_1']}\", \n" : '';
+                $data .= "], \"email\": {\"email\": \"email\", \"consequence\": 1.6}},1.5: {\"statement\": function(context) {return [ \n";
+                $data .= (!empty($messages['messages']['08_2'])) ? "\"{$messages['messages']['08_2']}\", \n" : '';
+                $data .= "];}},1.6: { \"statement\": [ \n";
+                $data .= (!empty($messages['messages']['09'])) ? "\"{$messages['messages']['09']}\", \n" : '';
+                $data .= (!empty($messages['messages']['10'])) ? "\"{$messages['messages']['10']}\", \n" : '';
+                $data .= "]}}};";
 
             // Replace {visitor_name} KEY
             $data = str_replace('{visitor_name}', "\" + context.name  + \"", $data);
@@ -508,7 +495,7 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
             // Try to write data.js file
             try {
                 $upload_dir = wp_upload_dir();
-                if (file_put_contents(trailingslashit($upload_dir['basedir']) . 'data.js', $data) === false) {
+                if ( file_put_contents( trailingslashit($upload_dir['basedir']) . 'data.js', $data) === false ){
                     throw new Exception(__("WPMM: The file data.js could not be written, the bot will not work correctly.", $this->plugin_slug));
                 }
             } catch (Exception $ex) {
@@ -521,8 +508,7 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
          *
          * @since 2.0.1
          */
-        public function delete_cache()
-        {
+        public function delete_cache() {
             // Super Cache Plugin
             if (function_exists('wp_cache_clear_cache')) {
                 wp_cache_clear_cache(is_multisite() && is_plugin_active_for_network($this->plugin_basename) ? get_current_blog_id() : '');
@@ -541,12 +527,11 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
          * @param array $links
          * @return array
          */
-        public function add_settings_link($links)
-        {
+        public function add_settings_link($links) {
             return array_merge(
-                array(
-                    'wpmm_settings' => '<a href="' . admin_url('options-general.php?page=' . $this->plugin_slug) . '">' . __('Settings', $this->plugin_slug) . '</a>',
-                ), $links
+                    array(
+                'wpmm_settings' => '<a href="' . admin_url('options-general.php?page=' . $this->plugin_slug) . '">' . __('Settings', $this->plugin_slug) . '</a>'
+                    ), $links
             );
         }
 
@@ -555,17 +540,16 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
          *
          * @since 2.0.0
          */
-        public function add_notices()
-        {
+        public function add_notices() {
             $screen = get_current_screen();
             $notices = array();
 
             if ($this->plugin_screen_hook_suffix != $screen->id) {
                 // notice if plugin is activated
-                if ($this->plugin_settings['general']['status'] == 1 && $this->plugin_settings['general']['notice'] == 1) {
+                if (array_key_exists('general', $this->plugin_settings) && $this->plugin_settings['general']['status'] == 1 && $this->plugin_settings['general']['notice'] == 1) {
                     $notices['is_activated'] = array(
                         'class' => 'error',
-                        'msg' => sprintf(__('The Maintenance Mode is <strong>active</strong>. Please don\'t forget to <a href="%s">deactivate</a> as soon as you are done.', $this->plugin_slug), admin_url('options-general.php?page=' . $this->plugin_slug)),
+                        'msg' => sprintf(__('The Maintenance Mode is <strong>active</strong>. Please don\'t forget to <a href="%s">deactivate</a> as soon as you are done.', $this->plugin_slug), admin_url('options-general.php?page=' . $this->plugin_slug))
                     );
                 }
 
@@ -580,10 +564,10 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
 
                 // notice promo for codepad
                 ob_start();
-                include_once WPMM_VIEWS_PATH . 'promo-strictthemes.php';
+                include_once(WPMM_VIEWS_PATH . 'promo-strictthemes.php');
                 $notices['promo-strictthemes'] = array(
                     'class' => 'wpmm_notices updated notice is-dismissible',
-                    'msg' => ob_get_clean(),
+                    'msg' => ob_get_clean()
                 );
             }
 
@@ -591,7 +575,7 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
             $dismissed_notices = $this->get_dismissed_notices(get_current_user_id());
 
             // template
-            include_once WPMM_VIEWS_PATH . 'notice.php';
+            include_once(WPMM_VIEWS_PATH . 'notice.php');
         }
 
         /**
@@ -599,8 +583,7 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
          *
          * @throws Exception
          */
-        public function dismiss_notices()
-        {
+        public function dismiss_notices() {
             try {
                 if (empty($_POST['notice_key'])) {
                     throw new Exception(__('Notice key cannot be empty.', $this->plugin_slug));
@@ -622,8 +605,7 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
          * @param int $user_id
          * @return array
          */
-        public function get_dismissed_notices($user_id)
-        {
+        public function get_dismissed_notices($user_id) {
             $dismissed_notices = get_user_meta($user_id, $this->dismissed_notices_key, true);
 
             return array_filter(explode(',', $dismissed_notices), 'trim');
@@ -636,8 +618,7 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
          * @param int $user_id
          * @param string $notice_key
          */
-        public function save_dismissed_notices($user_id, $notice_key)
-        {
+        public function save_dismissed_notices($user_id, $notice_key) {
             $dismissed_notices = $this->get_dismissed_notices($user_id);
             $dismissed_notices[] = $notice_key;
 
@@ -649,8 +630,7 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
          *
          * @param string $text
          */
-        public function admin_footer_text($text)
-        {
+        public function admin_footer_text($text) {
             $screen = get_current_screen();
 
             if ($this->plugin_screen_hook_suffix == $screen->id) {
@@ -660,40 +640,43 @@ if (!class_exists('WP_Maintenance_Mode_Admin')) {
             return $text;
         }
 
-        public function get_is_policy_available()
-        {
+        public function get_is_policy_available() {
             if (function_exists('get_privacy_policy_url')) {
                 return true;
             }
             return false;
         }
 
-        public function get_policy_link()
-        {
+        public function get_policy_link() {
             //Check feature is available
-            if ($this->get_is_policy_available()) {
+            if($this->get_is_policy_available()) {
                 return get_privacy_policy_url();
             }
         }
 
-        public function get_policy_link_message()
-        {
+        public function get_policy_link_message() {
             $url = $this->get_policy_link();
-            if ($this->get_is_policy_available() && $this->plugin_settings['gdpr']['policy_page_link'] === '') {
-                if ($url === '') { // No value and feature available
+            if($this->get_is_policy_available() && $this->plugin_settings['gdpr']['policy_page_link'] === '') {
+                if($url === '') { // No value and feature available
                     return __("Your WordPress version supports Privacy settings but you haven't set any privacy policy page yet. Go to Settings ➡ Privacy to set one.", $this->plugin_slug);
-                } else { // Value and feature available
+                }
+                else { // Value and feature available
                     return sprintf(__('The plugin detected this Privacy page: %1$s – %2$sUse this url%3$s', $this->plugin_slug), $url, '<button>', '</button>');
                 }
-            } elseif ($this->get_is_policy_available() && $this->plugin_settings['gdpr']['policy_page_link'] != '') { // Feature available and value set
-                if ($url != $this->plugin_settings['gdpr']['policy_page_link']) { // Current wp privacy page differs from set value
+            }
+            elseif($this->get_is_policy_available() && $this->plugin_settings['gdpr']['policy_page_link'] != '') { // Feature available and value set
+                if($url != $this->plugin_settings['gdpr']['policy_page_link']) { // Current wp privacy page differs from set value
                     return sprintf(__("Your Privacy page is pointing to a different URL in WordPress settings. If that's correct ignore this message, otherwise %s", $this->plugin_slug), 'UPDATE VALUE TO NEW URL');
                 }
-            } elseif (!$this->get_is_policy_available()) { // No privacy feature available
+            }
+            elseif(!$this->get_is_policy_available()) { // No privacy feature available
                 return __("No privacy features detected for your WordPress version. Update WordPress to get this field automatically filled in or type in the URL that points to your privacy policy page.", $this->plugin_slug);
             }
         }
-
+    
+    
+    
+    
     }
 
 }
