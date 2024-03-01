@@ -1,7 +1,7 @@
 [submodule "wp-content/plugins/wp-maintenance-mode"]
 	path = wp-content/plugins/wp-maintenance-mode
 	url = https://github.com/anito/wp-maintenance-mode
-[submodule "wp-maintenance-mode"]
-	path = wp-maintenance-mode
+[submodule "wp-content/plugins/wp-maintenance-mode-test"]
+	path = wp-content/plugins/wp-maintenance-mode-test
 	url = https://github.com/anito/wp-maintenance-mode
 	branch = master
